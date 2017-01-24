@@ -13,6 +13,9 @@ public class ServerController {
 		
 		Thread smtpServerThread = createServerThread("smtp", smtpPort);
 		Thread imapServerThread = createServerThread("imap", imapPort);
+		//TODO
+		//Should catch the IllegalArgumentException
+		//and do... something?
 		smtpServerThread.start();
 		imapServerThread.start();
 		
@@ -33,7 +36,7 @@ public class ServerController {
 		} while(true);
 	}
 	
-	
+
 	private static Thread createServerThread(String type, int port) throws IllegalArgumentException {
 		Thread newThread;
 		if (type.equals("smtp")) {
