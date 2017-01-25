@@ -1,13 +1,14 @@
+import javax.net.ssl.SSLSocket;
 
-public class ImapServer {
-	public ImapServer(int p) {
-		int port = p;
+public class ImapServer extends SSLServer{
+	@Override
+	int setServerPort() {
+		return ServerController.getImapPort();
 	}
+
+	@Override
+	Thread createConnectionThread(SSLSocket connection) {
+		return new Thread(new IMAPConnection(connection), "IMAPConnection");
+	}	
 	
-	public void startServer() {
-		//TODO implement a server
-			//right now this just repeats forever as the thread
-			//is created and destroyed
-		System.out.println("Imap server started");
-	}
 }

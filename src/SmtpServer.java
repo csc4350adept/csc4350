@@ -1,13 +1,15 @@
 
-public class SmtpServer {
-	public SmtpServer(int p) {
-		int port = p;
+import javax.net.ssl.SSLSocket;
+
+public class SmtpServer extends SSLServer{
+	@Override
+	int setServerPort() {
+		return ServerController.getSmtpPort();
 	}
+
+	@Override
+	Thread createConnectionThread(SSLSocket connection) {
+		return new Thread(new SMTPConnection(connection), "SMTPConnection");
+	}	
 	
-	public void startServer() {
-		//TODO implement a server
-			//right now this just repeats forever as the thread
-			//is created and destroyed
-		System.out.println("SMTP Server started");
-	}
 }

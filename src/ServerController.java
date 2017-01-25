@@ -1,15 +1,38 @@
+/*
+ * There are no outputs yet, I'll put those in tomorrow.
+ * You can still connect and see a "Connection started" message in System.out
+ * I use openssl s_client -connect localhost:465 -tls1
+ * Right now there is no certificate trust, only self-signed
+ * No diffie hellman perfect forward secrecy
+ * Probably should limit ciphers and do tls 1.2 only
+ */
+
 
 public class ServerController {
+	private static int smtpPort;
+	private static int imapPort;
+	private static String hostname;
+	private static String keysFilePath;
+	private static char[] keysFilePwd;
+	private static char[] keysPwd;
 
 	public static void main(String[] args) {
+		//Note, args not like python
+		//args[0] is the first arg, not the command string
 		int smtpDefaultPort = 465;
 		int imapDefaultPort = 993;
+		String defaultHostname = "localhost";
 		//TODO
 			//These should get pulled in order of priority from:
 			//args, config file, defaults
 			//eventually...
-		int smtpPort = smtpDefaultPort;
-		int imapPort = imapDefaultPort;
+		smtpPort = smtpDefaultPort;
+		imapPort = imapDefaultPort;
+		hostname = defaultHostname;
+		keysFilePath = "sekeys.jks";
+		keysFilePwd = "foobar".toCharArray();
+		keysPwd = "123foobar!".toCharArray();
+		
 		
 		Thread smtpServerThread = createServerThread("smtp", smtpPort);
 		Thread imapServerThread = createServerThread("imap", imapPort);
@@ -19,7 +42,6 @@ public class ServerController {
 		smtpServerThread.start();
 		imapServerThread.start();
 		
-		//Restarts server threads if they break
 		do {
 			if (smtpServerThread.getState() == Thread.State.TERMINATED) {
 				smtpServerThread = createServerThread("smtp", smtpPort);
@@ -42,14 +64,14 @@ public class ServerController {
 		if (type.equals("smtp")) {
 			newThread = new Thread(new Runnable() {
 				public void run() {
-					SmtpServer smtpServer = new SmtpServer(port);
+					SmtpServer smtpServer = new SmtpServer();
 					smtpServer.startServer();
 				}
 			});
 		} else if (type.equals("imap")) {
 			newThread = new Thread(new Runnable() {
 				public void run() {
-					ImapServer imapServer = new ImapServer(port);
+					ImapServer imapServer = new ImapServer();
 					imapServer.startServer();
 				}
 			});
@@ -58,5 +80,23 @@ public class ServerController {
 		}
 		return newThread;
 	}
-
+	
+	public static String getHostname() {
+		return hostname;
+	}
+	public static int getSmtpPort() {
+		return smtpPort;
+	}
+	public static int getImapPort() {
+		return imapPort;
+	}
+	public static String getKeysFilePath() {
+		return keysFilePath;
+	}
+	public static char[] getKeysFilePwd() {
+		return keysFilePwd;
+	}
+	public static char[] getKeysPwd() {
+		return keysPwd;
+	}
 }
