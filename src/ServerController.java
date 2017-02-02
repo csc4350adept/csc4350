@@ -15,6 +15,7 @@ public class ServerController {
 	private static String keysFilePath;
 	private static char[] keysFilePwd;
 	private static char[] keysPwd;
+	private static int smtpMaxSize;
 
 	public static void main(String[] args) {
 		//Note, args not like python
@@ -32,6 +33,7 @@ public class ServerController {
 		keysFilePath = "sekeys.jks";
 		keysFilePwd = "foobar".toCharArray();
 		keysPwd = "123foobar!".toCharArray();
+		smtpMaxSize = 250000000;
 		
 		
 		Thread smtpServerThread = createServerThread("smtp", smtpPort);
@@ -39,6 +41,7 @@ public class ServerController {
 		//TODO
 		//Should catch the IllegalArgumentException
 		//and do... something?
+		System.out.println("Server starting");
 		smtpServerThread.start();
 		imapServerThread.start();
 		
@@ -98,5 +101,8 @@ public class ServerController {
 	}
 	public static char[] getKeysPwd() {
 		return keysPwd;
+	}
+	public static int getSmtpMaxSize() {
+		return smtpMaxSize;
 	}
 }

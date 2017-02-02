@@ -1,4 +1,3 @@
-
 import javax.net.ssl.SSLSocket;
 
 public class SmtpServer extends SSLServer{
@@ -8,8 +7,13 @@ public class SmtpServer extends SSLServer{
 	}
 
 	@Override
-	Thread createConnectionThread(SSLSocket connection) {
-		return new Thread(new SMTPConnection(connection), "SMTPConnection");
+	Thread createConnectionThread(SSLSocket socket) {
+		return new Thread(new Runnable() {
+			public void run() {
+				SMTPConnection connection = new SMTPConnection(socket);
+				connection.start();
+			}
+		});
 	}	
 	
 }

@@ -7,8 +7,13 @@ public class ImapServer extends SSLServer{
 	}
 
 	@Override
-	Thread createConnectionThread(SSLSocket connection) {
-		return new Thread(new IMAPConnection(connection), "IMAPConnection");
+	Thread createConnectionThread(SSLSocket socket) {
+		return new Thread(new Runnable() {
+			public void run() {
+				IMAPConnection connection = new IMAPConnection(socket);
+				connection.start();
+			}
+		});
 	}	
 	
 }

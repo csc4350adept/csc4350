@@ -1,15 +1,20 @@
 import javax.net.ssl.SSLSocket;
 
-public class SMTPConnection implements Runnable {
-	private SSLSocket connection;
-	
+public class SMTPConnection extends Connection {
+
 	public SMTPConnection(SSLSocket connection) {
-		this.connection = connection;
-		
+		super(connection);
 	}
 
 	@Override
-	public void run() {
-		System.out.println("Connection started");
+	String handleResult(byte[] data) {
+		String resp;
+		
+		/*Debugging: right now this just echoes back what it received in both byte and string form*/
+		resp = new String(data);
+		System.out.println(resp);
+		
+		return resp;
 	}
+	
 }
