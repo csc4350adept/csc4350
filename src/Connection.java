@@ -15,7 +15,7 @@ abstract public class Connection {
 		while (true) {
 			byte[] data = new byte[0];
 			String resp;
-			int chunkSize = 2;
+			int chunkSize = 64;
 			byte[] buffer = new byte[chunkSize];
 			try {
 				InputStream in = this.connection.getInputStream();
