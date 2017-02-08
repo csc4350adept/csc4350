@@ -12,7 +12,7 @@ public class SMTPConnection extends Connection {
 		
 		/*Debugging: right now this just echoes back what it received in both byte and string form*/
 		resp = new String(data);
-		System.out.println(resp);
+		System.out.println("Received: " + resp + " : End of response.");
 		
 		return resp;
 	}

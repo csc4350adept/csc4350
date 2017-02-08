@@ -36,6 +36,7 @@ abstract public class Connection {
 					if (lastBufferByte == 10) {
 						break;
 					}
+					buffer = new byte[chunkSize];
 				}
 				byte[] result = new byte[pos];
 				System.arraycopy(data, 0, result, 0, pos);
@@ -59,6 +60,8 @@ abstract public class Connection {
 				return;
 			}
 		}
+		System.out.println("Connection closed.");
+		//Close the connection here
 	}
 	
 	abstract String handleResult(byte[] data);
