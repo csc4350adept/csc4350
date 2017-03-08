@@ -9,7 +9,13 @@ public class IMAPConnection extends Connection {
 
 	@Override
 	String handleResult(byte[] command) {
-		return processor.processBytes(command);
+		/*
+		 * Debug stuff
+		 */
+		System.out.println("Received command: " + new String(command));
+		String resp = processor.processBytes(command);
+		System.out.println("Generated response: " + resp);
+		return resp;
 	}
 	
 }

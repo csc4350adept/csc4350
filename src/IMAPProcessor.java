@@ -21,15 +21,16 @@ public class IMAPProcessor extends CmdProcessor {
 	
 	public boolean checkAuth(String username, String password) {
 		String dbPassword = QueryHandler.getPassword(username);
-		
-		if (password != null && password == dbPassword)
+		System.out.println(password);
+		System.out.println(dbPassword);
+		if (password != null && password.equals(dbPassword))
 			return true;
 		
 		return false;
 	}
 	
 	public String queryGenerator() {
-		switch (cmd) {
+		switch (query.getCommand()) {
 			case "LOGIN":
 				if (checkAuth(query.getUsername(), query.getPassword())) { // If the username and password are the same as in the DB
 					isAuthenticated = true;
