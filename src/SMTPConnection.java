@@ -1,7 +1,7 @@
 import javax.net.ssl.SSLSocket;
 
 public class SMTPConnection extends Connection {
-	SmtpProcessor processor = new SmtpProcessor();
+	SMTPProcessor processor = new SMTPProcessor();
 
 	public SMTPConnection(SSLSocket connection) {
 		super(connection);
