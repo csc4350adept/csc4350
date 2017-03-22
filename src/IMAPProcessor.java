@@ -21,8 +21,6 @@ public class IMAPProcessor extends CmdProcessor {
 	
 	public boolean checkAuth(String username, String password) {
 		String dbPassword = QueryHandler.getPassword(username);
-		System.out.println(password);
-		System.out.println(dbPassword);
 		if (password != null && password.equals(dbPassword))
 			return true;
 		

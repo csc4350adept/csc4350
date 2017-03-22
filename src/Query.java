@@ -21,8 +21,8 @@ public class Query {
 			String[] loginArray = command.split(" ");
 			
 			if (loginArray.length == 3) { // Precisely "LOGIN Username Password" format
-				username = loginArray[1];
-				password = loginArray[2];
+				username = loginArray[1].trim();
+				password = loginArray[2].trim();
 				return command = "LOGIN";
 			}
 		}
@@ -40,5 +40,9 @@ public class Query {
 	
 	public String getPassword() {
 		return password;
+	}
+	
+	public String getCommand() {
+		return command;
 	}
 }
