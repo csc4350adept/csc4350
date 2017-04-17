@@ -16,6 +16,12 @@ public class ServerController {
 	private static char[] keysFilePwd;
 	private static char[] keysPwd;
 	private static int smtpMaxSize;
+	//Database defaults
+	private static String dbHostname;
+	private static int dbPort;
+	private static String dbName;
+	private static String dbUname;
+	private static String dbPwd;
 
 	public static void main(String[] args) {
 		//Note, args not like python
@@ -34,7 +40,11 @@ public class ServerController {
 		keysFilePwd = "foobar".toCharArray();
 		keysPwd = "123foobar!".toCharArray();
 		smtpMaxSize = 250000000;
-		
+		dbHostname = "138.197.104.156";
+		dbPort = 5432;
+		dbName = "CoreDB";
+		dbUname = "adept";
+		dbPwd = "adept";
 		
 		Thread smtpServerThread = createServerThread("smtp", smtpPort);
 		Thread imapServerThread = createServerThread("imap", imapPort);
@@ -104,5 +114,20 @@ public class ServerController {
 	}
 	public static int getSmtpMaxSize() {
 		return smtpMaxSize;
+	}
+	public static String getDBHostname() {
+		return dbHostname;
+	}
+	public static String getDBPort() {
+		return new Integer(dbPort).toString();
+	}
+	public static String getDBName() {
+		return dbName;
+	}
+	public static String getDBUname() {
+		return dbUname;
+	}
+	public static String getDBPwd() {
+		return dbPwd;
 	}
 }

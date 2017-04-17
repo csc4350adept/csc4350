@@ -1,14 +1,55 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.sql.*;
+import java.util.*;
 
+/*
+ * QueryHandler interacts with the server postgres database.
+ * It will take in paramaters and run a select statement
+ * It will return the results of the select statement if the select statement succeeds
+ * If the select statement fails it will return null (or false if boolean)
+ */
 public class QueryHandler {
-	//TODO Implement DB stuff here
-	//Expected Result 1: "???? OK - User Authenticated" if username and password are the same
-	//Expected Result 2: "???? NO - Login Failure: Invalid username or password
-	//Expected Result 3: "???? If the query fails, return null"
 	
+	/*
+	 * This sets up the database connection and returns it.
+	 */
+	public static java.sql.Connection createDB() throws SQLException{
+		java.sql.Connection c = null;
+		String hostname = ServerController.getDBHostname();
+		String port = ServerController.getDBPort();
+		String dbname = ServerController.getDBName();
+		String uname = ServerController.getDBUname();
+		String pword = ServerController.getDBPwd();
+		String driverManager = String.format("jdbc:postgresql://%s:%s/%s", hostname, port, dbname);
+		try {
+			c = DriverManager.getConnection(driverManager, uname, pword);
+		} catch (SQLException e) {
+			throw e;
+		}
+		if (c == null) throw new SQLException("SQL connection failed.");
+		return c;
+	}
+
+	/*
+	 * Retrieves a password from the database using a username
+	 */
 	public static String getPassword (String username) {
-		return "foobar"; // The user's actual password in the DB 
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return null;
+		}
+		String sql = String.format("select passwordhash from users where email = '%s'", username);
+		try {
+			Statement msg = c.createStatement();
+			ResultSet resp = msg.executeQuery(sql);
+			if (resp.getString("passwordhash") != null) return resp.getString("passwordhash");
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		return null;
 	}
 	
 	public static ArrayList listRef(String userName) {
