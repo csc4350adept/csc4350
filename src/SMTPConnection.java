@@ -11,5 +11,4 @@ public class SMTPConnection extends Connection {
 	String handleResult(byte[] command) {
 		return processor.processBytes(command);
 	}
-	
 }

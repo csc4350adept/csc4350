@@ -7,5 +7,6 @@ public class CmdProcessor {
 	
 	public String processByteArray(byte[] byteArray) {
 		return new String (byteArray);
-	}	
+	}
+	
 }

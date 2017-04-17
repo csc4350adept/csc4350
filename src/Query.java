@@ -2,6 +2,7 @@
 
 public class Query {
 	// GLOBAL Variables
+	private String fullCommand;
 	private String command;
 	
 	// LOGIN Variables
@@ -9,14 +10,17 @@ public class Query {
 	private String password;
 	
 	// UPDATE Variables
+	private String mailbox;
 	
 	// GLOBAL Instances
 	
-	public Query (String command) {
-		this.command = command;
+	public Query () {
+		
 	}
 	
-	public String setCommand() {
+	public String setCommand(String cmd) {
+		fullCommand = cmd;
+		command = cmd;
 		if (command.substring(0, command.indexOf(" ")).equals("LOGIN")) {
 			String[] loginArray = command.split(" ");
 			
@@ -26,10 +30,13 @@ public class Query {
 				return command = "LOGIN";
 			}
 		}
-		else if (command.substring(0, command.indexOf(" ")).equals("LIST"))
+		else if (command.substring(0, command.indexOf(" ")).equals("LIST")) {
+			
 			return command = "LIST";
-		else if (command.substring(0, command.indexOf(" ")).contains("FETCH"))
+		}
+		else if (command.substring(0, command.indexOf(" ")).contains("FETCH")) {
 			return command = "FETCH";
+		}
 		
 		return null;
 	}
@@ -44,5 +51,13 @@ public class Query {
 	
 	public String getCommand() {
 		return command;
+	}
+	
+	public String getMailbox() {
+		return mailbox;
+	}
+	
+	public String getFullCommand() {
+		return fullCommand;
 	}
 }
