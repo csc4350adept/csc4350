@@ -1,4 +1,7 @@
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
 import javax.net.ssl.*;
 
 import java.io.*;
@@ -34,7 +37,31 @@ abstract public class SSLServer {
 			KeyManagerFactory keyFactory = KeyManagerFactory.getInstance("SunX509");
 			keyFactory.init(keys, this.keysPwd);
 			SSLContext context = SSLContext.getInstance("TLS");
-			context.init(keyFactory.getKeyManagers(), null,  null);
+			
+			//Create TrustManager
+			//Server doesn't verify identity of clients at initial connection
+			//Only clients verify the identity of the server
+			TrustManager trustManager = new X509TrustManager() {
+
+				@Override
+				public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+					//Be naive
+				}
+
+				@Override
+				public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+					//Be naive
+					
+				}
+
+				@Override
+				public X509Certificate[] getAcceptedIssuers() {
+					//Be naive
+					return null;
+				}
+			};	
+			
+			context.init(keyFactory.getKeyManagers(), new TrustManager[] {trustManager},  null);
 			SSLServerSocketFactory socketFactory = context.getServerSocketFactory();
 			this.server = (SSLServerSocket) socketFactory.createServerSocket(this.port);		
 		} catch (Exception e) {
