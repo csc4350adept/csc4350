@@ -1,5 +1,7 @@
 import java.io.*;
+import java.lang.*;
 import java.net.SocketException;
+import java.util.ArrayList;
 
 import javax.net.ssl.SSLSocket;
 
@@ -50,7 +52,12 @@ abstract public class Connection {
 				if (result.length > 0) {
 					resp = handleResult(result);
 					try {
-						out.write(resp.getBytes());
+						//Need to add a null byte to the end of the response string
+						byte [] tmp = resp.getBytes();
+						byte[] byteResp = new byte[tmp.length + 1];
+						java.lang.System.arraycopy(tmp, 0, byteResp, 0, tmp.length);
+						byteResp[byteResp.length - 1] = 0;
+						out.write(byteResp);
 						out.flush();
 					} catch (SocketException e) {
 						System.out.println("Error Writing resp to socket.");
@@ -61,7 +68,17 @@ abstract public class Connection {
 					out.flush();
 					break;
 				}
-			} catch (IOException e) {
+			} catch (SocketException e) {
+				if (e.getMessage().equals("Connection reset")) {
+					System.out.println(e.getMessage());
+					try {
+						connection.close();
+					} catch (IOException IOe) {
+						/*Do nothing*/
+					}
+					return;
+				}
+			}catch (IOException e) {
 				System.out.println(e.toString());
 				return;
 			}

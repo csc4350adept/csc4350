@@ -64,6 +64,12 @@ abstract public class SSLServer {
 			context.init(keyFactory.getKeyManagers(), new TrustManager[] {trustManager},  null);
 			SSLServerSocketFactory socketFactory = context.getServerSocketFactory();
 			this.server = (SSLServerSocket) socketFactory.createServerSocket(this.port);		
+		} catch (java.net.SocketException e) {
+			String eMsg = e.getMessage();
+			switch (eMsg) {
+				case "Connection reset":
+					System.out.println("Connection reset");
+			}
 		} catch (Exception e) {
 			System.err.println(e.toString());
 		}	
