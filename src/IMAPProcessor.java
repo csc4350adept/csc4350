@@ -12,7 +12,7 @@ public class IMAPProcessor extends CmdProcessor {
 	
 	public IMAPProcessor() {
 		query = new Query();
-		System.out.println("created queryyyyy");
+		//System.out.println("created queryyyyy");
 	}
 	
 	public String processBytes(byte[] command) {
@@ -66,7 +66,7 @@ public class IMAPProcessor extends CmdProcessor {
 			case "FETCH":
 				return ""; //TODO
 			default:
-				return "BAD - Invalid or unknown command."; //TODO find out what ???? means || connection identifier? (if so we dont care)
+				return "BAD - Invalid or unknown command"; //TODO find out what ???? means || connection identifier? (if so we dont care)
 		}
 	}
 }
