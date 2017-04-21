@@ -1,0 +1,82 @@
+
+SELECT version();
+ PostgreSQL 9.5.6 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 5.4.0-6ubuntu1~16.04.4) 5.4.0 20160609, 64-bit
+
+CREATE DATABASE coredb;
+ 
+CREATE TABLE users (
+  user id serial primary key,
+);
+
+ALTER TABLE public."users"
+    ADD COLUMN email text NOT NULL unique;
+
+create unique index users_unique_lower_email_idx on public.user (lower(email));
+
+ALTER TABLE public."users"
+    ADD COLUMN password character varying(100) COLLATE pg_catalog."default" NOT NULL;
+
+ALTER TABLE public."users"
+    ADD COLUMN certificate character varying(512) COLLATE pg_catalog."default" NOT NULL;
+	
+ALTER TABLE public."users"
+    ADD COLUMN last_login timestamp with time zone NOT NULL;
+	
+CREATE TABLE mailboxes (
+mailbox text NOT NULL,
+owner serial NOT NULL,
+primary key (mailbox, owner) );
+
+ALTER TABLE public.mailboxes
+    ADD CONSTRAINT mailboxes_pkey PRIMARY KEY (mailbox, owner);
+
+ALTER TABLE public."mailboxes"
+	owner SERIAL REFERENCES user_id;
+
+ALTER TABLE public.mailboxes
+    ADD CONSTRAINT fk_owner_users FOREIGN KEY (owner)
+    REFERENCES public.users (user_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+ALTER TABLE public.users
+    ADD CONSTRAINT fk_owner_users FOREIGN KEY (owner)
+    REFERENCES public.users (user_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+CREATE TABLE public.emails
+(
+    email_id integer NOT NULL DEFAULT nextval('emails_email_id_seq'::regclass),
+    owner integer NOT NULL DEFAULT nextval('emails_owner_seq'::regclass),
+    "to" character varying(150) COLLATE pg_catalog."default" NOT NULL,
+    "from" character varying(150) COLLATE pg_catalog."default" NOT NULL,
+    body text COLLATE pg_catalog."default",
+    date date NOT NULL,
+    read boolean NOT NULL,
+    mailbox text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT emails_pkey PRIMARY KEY (email_id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.emails
+    OWNER to adept;
+
+ALTER TABLE public.emails
+    ADD CONSTRAINT fk_email_id_user_id FOREIGN KEY (email_id)
+    REFERENCES public.users (user_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+	
+
+ALTER TABLE public.emails
+    ADD CONSTRAINT fk_owner_owner_mail_mail FOREIGN KEY (mailbox, owner)
+    REFERENCES public.mailboxes (mailbox, owner) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+ 
+ INSERT INTO users (user_id, email, password, certificate, last_login, isadmin) VALUES('1','amani@gmail.com','amani','dhj1jn2oj','2017-4-21 02:33:54+02','1');
