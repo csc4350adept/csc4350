@@ -79,4 +79,59 @@ ALTER TABLE public.emails
     ON DELETE NO ACTION;
 
  
- INSERT INTO users (user_id, email, password, certificate, last_login, isadmin) VALUES('1','amani@gmail.com','amani','dhj1jn2oj','2017-4-21 02:33:54+02','1');
+ INSERT INTO users (user_id, email, password, certificate, last_login, isadmin) 
+VALUES('1','amani@gmail.com','amani','dhj1jn2oj','2017-4-21 02:33:54+02','1');
+
+ALTER TABLE public.users
+    ADD COLUMN last_login timestamp with time zone NOT NULL DEFAULT now();
+	
+ALTER TABLE public.users
+    ADD COLUMN isadmin boolean NOT NULL DEFAULT false;
+	
+ALTER TABLE public.users
+    ADD COLUMN certificate character varying COLLATE pg_catalog."default";
+
+ALTER TABLE public.emails
+    ADD COLUMN subject character varying COLLATE pg_catalog."default";
+
+ALTER TABLE public.emails
+    ADD COLUMN read boolean NOT NULL DEFAULT false;
+
+ALTER TABLE public.emails
+    ADD COLUMN date date NOT NULL DEFAULT now();
+
+ALTER TABLE public.emails
+    ADD CONSTRAINT fk_owner_user_id FOREIGN KEY (owner)
+    REFERENCES public.users (user_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+	
+ALTER TABLE public.mailboxes
+    ADD CONSTRAINT uq_mail_own UNIQUE (mailbox, owner);
+
+
+
+CREATE TABLE public.mailboxes
+(
+    mailbox_id integer NOT NULL DEFAULT nextval('mailboxes_mailbox_id_seq'::regclass),
+    mailbox character varying COLLATE pg_catalog."default",
+    owner integer NOT NULL DEFAULT nextval('mailboxes_owner_seq'::regclass),
+    CONSTRAINT mailboxes_pkey PRIMARY KEY (mailbox_id),
+    CONSTRAINT fk_owner_user_id FOREIGN KEY (owner)
+        REFERENCES public.users (user_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.mailboxes
+    OWNER to adept;
+	
+ALTER TABLE public.emails
+    ADD CONSTRAINT fk_mail_mail FOREIGN KEY (mailbox)
+    REFERENCES public.mailboxes (mailbox_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
