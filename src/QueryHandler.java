@@ -153,6 +153,8 @@ public class QueryHandler {
 			parts.addAll(Arrays.asList(new String[] {"date", "to", "from", "subject"}));
 		else if (fetchType.equals("BODY"))
 			parts.add("body");
+		else if (fetchType.equals("FLAGS"))
+			parts.add("read");
 		else
 			return null;
 		sql = String.format("select %s from emails where email_id=%s", String.join(", ", parts), emailID);
@@ -163,8 +165,17 @@ public class QueryHandler {
 			System.out.println("Executed query: " + sql);
 			String component;
 			for (String part : parts) {
-				if (rs.next() && (component = rs.getString(part)) != null)
+				if (rs.next() && (component = rs.getString(part)) != null) {
+					if (part.equals("read")) {
+						switch (component) {
+							case "t":
+								component = "READ";
+							case "f":
+								component = "UNREAD";
+						}
+					}
 					email.put(part, component);
+				}
 			}
 			if (email.keySet().size() > 0) return email;
 		} catch (SQLException e) {

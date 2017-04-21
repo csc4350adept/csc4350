@@ -82,7 +82,7 @@ public class IMAPProcessor extends CmdProcessor {
 							boolean missingData = false;
 							respParts.add(okString);
 							for (String key : new String[] {"date", "to", "from", "subject"})
-								if (fetchData.containsKey(key)) respParts.add(fetchData.get(key));
+								if (fetchData.containsKey(key)) respParts.add(String.format("%s: %s", key.toUpperCase(), fetchData.get(key)));
 								else missingData = true;
 							if (!missingData) resp = String.join("\n", respParts);
 							return resp;
@@ -90,6 +90,13 @@ public class IMAPProcessor extends CmdProcessor {
 							fetchData = QueryHandler.fetch(emailID, respType);
 							if (fetchData != null && fetchData.containsKey("body")) {
 								resp = String.join("\n", new String[] {okString, fetchData.get("body")});
+							}
+							return resp;
+						case "FLAGS":
+							//A bit redundant, I know...
+							fetchData = QueryHandler.fetch(emailID, respType);
+							if (fetchData != null && fetchData.containsKey("flags")) {
+								resp = String.join("\n", new String[] {okString, fetchData.get("flags")});
 							}
 							return resp;
 					}
