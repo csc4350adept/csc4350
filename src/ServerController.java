@@ -42,7 +42,7 @@ public class ServerController {
 		smtpMaxSize = 250000000;
 		dbHostname = "138.197.104.156";
 		dbPort = 5432;
-		dbName = "CoreDB";
+		dbName = "coredb";
 		dbUname = "adept";
 		dbPwd = "adept";
 		

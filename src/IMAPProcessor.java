@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 //By B. Daniel Garber
 
@@ -64,7 +66,34 @@ public class IMAPProcessor extends CmdProcessor {
 						return "NO - List Failure: Can't list that reference or name";
 				}
 			case "FETCH":
-				return ""; //TODO
+				String req = query.getFullCommand();
+				ArrayList<String> reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
+				if(reqParts.size() == 3) {
+					String resp = "NO - fetch error: can't fetch that data";
+					String emailID = reqParts.get(1);
+					String respType = reqParts.get(2);
+					HashMap<String, String> fetchData;
+					String okString = "OK - fetch completed";
+					switch (respType) {
+						case "HEADER":
+							ArrayList<String> respParts = new ArrayList<String>();
+							fetchData = QueryHandler.fetch(emailID, respType);
+							if (fetchData == null) return resp;
+							boolean missingData = false;
+							respParts.add(okString);
+							for (String key : new String[] {"date", "to", "from", "subject"})
+								if (fetchData.containsKey(key)) respParts.add(fetchData.get(key));
+								else missingData = true;
+							if (!missingData) resp = String.join("\n", respParts);
+							return resp;
+						case "BODY":
+							fetchData = QueryHandler.fetch(emailID, respType);
+							if (fetchData != null && fetchData.containsKey("body")) {
+								resp = String.join("\n", new String[] {okString, fetchData.get("body")});
+							}
+							return resp;
+					}
+				}
 			default:
 				return "BAD - Invalid or unknown command"; //TODO find out what ???? means || connection identifier? (if so we dont care)
 		}

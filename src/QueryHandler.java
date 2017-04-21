@@ -43,7 +43,7 @@ public class QueryHandler {
 			return null;
 		}
 		//Constructs SQL string
-		String sql = String.format("select passwordhash from users where email='%s'", username);
+		String sql = String.format("select password from users where email='%s'", username);
 		//Executes query
 		try {
 			Statement st = c.createStatement();
@@ -51,8 +51,8 @@ public class QueryHandler {
 			System.out.println("Executed query: " + sql);
 			String pword;
 			//If there is a row returned, get the column "passwordhash" and return it
-			if (rs.next() && rs.getString("passwordhash") != null) {
-				pword = rs.getString("passwordhash");
+			if (rs.next() && rs.getString("password") != null) {
+				pword = rs.getString("password");
 				System.out.println(String.format("Got this password from the DB: %s", rs.getString("passwordhash")));
 				return pword;
 			}
@@ -70,37 +70,108 @@ public class QueryHandler {
 	 * Modify email table so that every email belongs to a folder
 	 * Create table mailboxes with columns <email, mailboxName> with both as primary keys 
 	 */
-	public static ArrayList listRef(String userName) {
-		ArrayList<String> folders = new ArrayList<String>();
-		folders.add("inbox");
-		folders.add("sent");
-		folders.add("outbox");
-		folders.add("bullshit");
-		return folders; // The user's actual folders in the DB
+	public static ArrayList<String> listRef(String userName) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return null;
+		}
+		//Constructs SQL string
+		String sql = String.format("select mailbox from mailboxes where owner='%s'", userName);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+			ArrayList<String> mailboxes = new ArrayList<String>();
+			//If there is a row returned, add to the mailboxes list
+			String mailbox;
+			while (rs.next() && (mailbox = rs.getString("mailbox")) != null) {
+				mailboxes.add(mailbox);
+			}
+			System.out.println("Got database response\n" + String.join("\n", mailboxes));
+			return mailboxes;
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		//If there was a SQLException or no password, return null
+		return null;
 	}
 	
 	/*
 	 * Take in a email and a mailboxName
 	 * Return an ArrayList of emailIDs that belong to that email and belong to that mailboxName
 	 */
-	public static ArrayList listMailbox(String userName, String mailboxName) {
-		ArrayList<String> emailIDs = new ArrayList<String>();
-		emailIDs.add("1");
-		emailIDs.add("2");
-		emailIDs.add("3");
-		return emailIDs; // The user's actual email IDs in the DB
+	public static ArrayList<String> listMailbox(String userName, String mailboxName) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return null;
+		}
+		//Constructs SQL string
+		String sql = String.format("select email_id from emails inner join users on emails.owner=users.user_id where email='%s' and mailbox='%s';", userName, mailboxName);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+			ArrayList<String> mailboxes = new ArrayList<String>();
+			//If there is a row returned, add to the mailboxes list
+			String mailbox;
+			while (rs.next() && (mailbox = rs.getString("mailbox")) != null) {
+				mailboxes.add(mailbox);
+			}
+			return mailboxes;
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		//If there was a SQLException or no password, return null
+		return null;
 	}
 	
 	/*
 	 * Take in a email and emailID
 	 * Return a HashMap<String, String> with all the data for the email that has that emailID and belongs to that email
 	 */
-	public static HashMap emailID(String userName, String emailID) {
+	public static HashMap<String, String> fetch(String emailID, String fetchType) {
 		HashMap<String, String> email = new HashMap<String, String>();
-		email.put("owner", "ebull");
-		email.put("subject", "its a stack of fuckshit");
-		email.put("body", "on top of itself bitchhh");
-		return email; // The user's actual email data corresponding to this.emailID, in the DB
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return null;
+		}
+		//Constructs SQL string
+		String sql;
+		ArrayList<String> parts = new ArrayList<String>();
+		if (fetchType.equals("HEADER"))
+			parts.addAll(Arrays.asList(new String[] {"date", "to", "from", "subject"}));
+		else if (fetchType.equals("BODY"))
+			parts.add("body");
+		else
+			return null;
+		sql = String.format("select %s from emails where email_id=%s", String.join(", ", parts), emailID);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+			String component;
+			for (String part : parts) {
+				if (rs.next() && (component = rs.getString(part)) != null)
+					email.put(part, component);
+			}
+			if (email.keySet().size() > 0) return email;
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		//If there was a SQLException or no password, return null
+		return null;
 	}
 	
 	/*
