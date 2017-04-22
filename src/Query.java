@@ -37,6 +37,9 @@ public class Query {
 		else if (command.substring(0, command.indexOf(" ")).contains("FETCH")) {
 			return command = "FETCH";
 		}
+		else if (command.substring(0, command.indexOf(" ")).contains("APPEND")) {
+			return command = "APPEND";
+		}
 		
 		return null;
 	}

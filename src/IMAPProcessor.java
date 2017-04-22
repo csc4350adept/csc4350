@@ -32,75 +32,104 @@ public class IMAPProcessor extends CmdProcessor {
 	}
 	
 	public String queryGenerator() {
+		String req;
+		ArrayList<String> reqParts;
+		String resp = "BAD - Invalid or unknown command";
+		
 		switch (query.getCommand()) {
 			case "LOGIN":
 				if (checkAuth(query.getUsername(), query.getPassword())) { // If the username and password are the same as in the DB
 					isAuthenticated = true;
-					return "OK - User Authenticated";
+					resp = "OK - User Authenticated";
 				}
 				else // The username or processor are bad
-					return "NO - Login failure: Invalid username or password";
+					resp = "NO - Login failure: Invalid username or password";
+				break;
+			
 			case "LIST":
 				if (isAuthenticated && query.getUsername() != null) {
 					String refRegex = "LIST\\s[a-zA-Z0-9@_.]+";
 					String mailboxRegex = "LIST\\s[a-zA-Z0-9@_.]+\\s[a-zA-Z0-9_]+";
 					String command = query.getFullCommand();
-					ArrayList<String> resp = null;
+					ArrayList<String> result = null;
 					if (command.matches(refRegex)) {
 						String userName = command.split("\\s")[1];
-						resp = QueryHandler.listRef(userName);
+						result = QueryHandler.listRef(userName);
 					}
 					else if (command.matches(mailboxRegex)) {
 						String userName = command.split("\\s")[1];
 						String mailboxName = command.split("\\s")[2];
-						resp = QueryHandler.listMailbox(userName, mailboxName);
+						result = QueryHandler.listMailbox(userName, mailboxName);
 					}
 					
-					if (resp != null && !resp.isEmpty())
-						return "OK - List Completed\n" + String.join("\n", resp);
+					if (result != null)
+						resp = "OK - List Completed\n" + String.join("\n", result);
 					else
-						return "NO - List Failure: Can't list that reference or name";
+						resp = "NO - List Failure: Can't list that reference or name";
 				}
+				break;
+				
 			case "FETCH":
-				String req = query.getFullCommand();
-				ArrayList<String> reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
+				req = query.getFullCommand();
+				reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
 				if(reqParts.size() == 3) {
-					String resp = "NO - fetch error: can't fetch that data";
+					resp = "NO - fetch error: can't fetch that data";
 					String emailID = reqParts.get(1);
 					String respType = reqParts.get(2);
 					HashMap<String, String> fetchData;
 					String okString = "OK - fetch completed";
 					switch (respType) {
-						case "HEADER":
+						case "BODY[HEADER]":
 							ArrayList<String> respParts = new ArrayList<String>();
 							fetchData = QueryHandler.fetch(emailID, respType);
-							if (fetchData == null) return resp;
+							if (fetchData == null) break;
 							boolean missingData = false;
 							respParts.add(okString);
-							for (String key : new String[] {"date", "to", "from", "subject"})
+							for (String key : new String[] {"date", "to", "from", "subject"}) {
 								if (fetchData.containsKey(key)) respParts.add(String.format("%s: %s", key.toUpperCase(), fetchData.get(key)));
 								else missingData = true;
+							}
 							if (!missingData) {
 								resp = String.join("\n", respParts);
 							}
-							return resp;
-						case "BODY":
+							break;
+						case "BODY[TEXT]":
 							fetchData = QueryHandler.fetch(emailID, respType);
 							if (fetchData != null && fetchData.containsKey("body")) {
 								resp = String.join("\n", new String[] {okString, fetchData.get("body")});
 							}
-							return resp;
+							break;
 						case "FLAGS":
 							//A bit redundant, I know...
 							fetchData = QueryHandler.fetch(emailID, respType);
-							if (fetchData != null && fetchData.containsKey("flags")) {
-								resp = String.join("\n", new String[] {okString, fetchData.get("flags")});
+							if (fetchData != null && fetchData.containsKey("read")) {
+								resp = String.join("\n", new String[] {okString, fetchData.get("read")});
 							}
-							return resp;
+							break;
 					}
 				}
+				break;
+			
+			case "APPEND":
+				resp = "NO - append error: can't append to that mailbox, error in flags or date/time or message text";
+				req = query.getFullCommand();
+				reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
+				if (req.split("\\s").length == 3) {
+					String appendID = reqParts.get(1);
+					String appendFlag = reqParts.get(2).toLowerCase();
+					if (appendFlag.startsWith("\\") && appendFlag.length() > 1) appendFlag = appendFlag.substring(1);
+					switch (appendFlag) {
+						case "read":
+							if (QueryHandler.setRead(appendID)) resp = "OK - append completed";
+						default:
+							resp = "NO - append error: can't append to that mailbox, error in flags";
+					}
+				}
+				break;
+				
 			default:
-				return "BAD - Invalid or unknown command"; //TODO find out what ???? means || connection identifier? (if so we dont care)
+				resp = "BAD - Invalid or unknown command"; //TODO find out what ???? means || connection identifier? (if so we dont care)
 		}
+		return resp;
 	}
 }

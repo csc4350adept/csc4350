@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.awt.datatransfer.StringSelection;
 import java.sql.*;
 import java.util.*;
 
@@ -148,9 +147,9 @@ public class QueryHandler {
 		//Constructs SQL string
 		String sql;
 		ArrayList<String> parts = new ArrayList<String>();
-		if (fetchType.equals("HEADER"))
+		if (fetchType.equals("BODY[HEADER]"))
 			parts.addAll(Arrays.asList(new String[] {"date", "to", "from", "subject"}));
-		else if (fetchType.equals("BODY"))
+		else if (fetchType.equals("BODY[TEXT]"))
 			parts.add("body");
 		else if (fetchType.equals("FLAGS"))
 			parts.add("read");
@@ -180,19 +179,46 @@ public class QueryHandler {
 						switch (component) {
 							case "t":
 								component = "READ";
+								break;
 							case "f":
 								component = "UNREAD";
+								break;
 						}
 					}
 					email.put(part, component);
 				}
 			}
-			if (email.keySet().size() > 0) return email;
+			if (email.keySet().size() > 0) {
+				return email;
+			}
 		} catch (SQLException e) {
 			/* nothing */
 		}
 		//If there was a SQLException or no password, return null
 		return null;
+	}
+	
+	public static boolean setRead(String emailID) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		//Constructs SQL string
+		String sql = String.format("update emails set read=true where email_id=%s", emailID);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+		} catch (SQLException e) {
+			if (e.getMessage().startsWith("No results were returned by the query")) return true;
+			else System.out.println(e.getMessage());
+		}
+		//If there was a SQLException or no password, return null
+		return false;
 	}
 	
 	/*
