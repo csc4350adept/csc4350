@@ -1,7 +1,5 @@
 import java.io.*;
-import java.lang.*;
 import java.net.SocketException;
-import java.util.ArrayList;
 
 import javax.net.ssl.SSLSocket;
 

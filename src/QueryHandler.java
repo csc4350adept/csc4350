@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.awt.datatransfer.StringSelection;
 import java.sql.*;
 import java.util.*;
 
@@ -48,12 +49,10 @@ public class QueryHandler {
 		try {
 			Statement st = c.createStatement();
 			ResultSet rs = st.executeQuery(sql);
-			System.out.println("Executed query: " + sql);
 			String pword;
 			//If there is a row returned, get the column "passwordhash" and return it
 			if (rs.next() && rs.getString("password") != null) {
 				pword = rs.getString("password");
-				System.out.println(String.format("Got this password from the DB: %s", rs.getString("passwordhash")));
 				return pword;
 			}
 		} catch (SQLException e) {
@@ -79,7 +78,7 @@ public class QueryHandler {
 			return null;
 		}
 		//Constructs SQL string
-		String sql = String.format("select mailbox from mailboxes where owner='%s'", userName);
+		String sql = String.format("select mailbox from mailboxes inner join users on mailboxes.owner=users.user_id where email='%s'", userName);
 		//Executes query
 		try {
 			Statement st = c.createStatement();
@@ -91,7 +90,6 @@ public class QueryHandler {
 			while (rs.next() && (mailbox = rs.getString("mailbox")) != null) {
 				mailboxes.add(mailbox);
 			}
-			System.out.println("Got database response\n" + String.join("\n", mailboxes));
 			return mailboxes;
 		} catch (SQLException e) {
 			/* nothing */
@@ -113,7 +111,7 @@ public class QueryHandler {
 			return null;
 		}
 		//Constructs SQL string
-		String sql = String.format("select email_id from emails inner join users on emails.owner=users.user_id where email='%s' and mailbox='%s';", userName, mailboxName);
+		String sql = String.format("select email_id from emails inner join users on emails.owner=users.user_id inner join mailboxes on emails.mailbox=mailboxes.mailbox_id where email='%s' and mailboxes.mailbox='%s'", userName, mailboxName);
 		//Executes query
 		try {
 			Statement st = c.createStatement();
@@ -122,7 +120,7 @@ public class QueryHandler {
 			ArrayList<String> mailboxes = new ArrayList<String>();
 			//If there is a row returned, add to the mailboxes list
 			String mailbox;
-			while (rs.next() && (mailbox = rs.getString("mailbox")) != null) {
+			while (rs.next() && (mailbox = rs.getString("email_id")) != null) {
 				mailboxes.add(mailbox);
 			}
 			return mailboxes;
@@ -146,6 +144,7 @@ public class QueryHandler {
 		} catch (SQLException e) {
 			return null;
 		}
+		
 		//Constructs SQL string
 		String sql;
 		ArrayList<String> parts = new ArrayList<String>();
@@ -155,17 +154,28 @@ public class QueryHandler {
 			parts.add("body");
 		else if (fetchType.equals("FLAGS"))
 			parts.add("read");
-		else
+		else {
 			return null;
-		sql = String.format("select %s from emails where email_id=%s", String.join(", ", parts), emailID);
+		}
+		HashMap<String, String> partsFormatted = new HashMap<String, String>();
+		ArrayList<String> partsSQL = new ArrayList<String>();
+		for (String part : parts) {
+			String partSQL = String.format("emails.%s", part);
+			partsFormatted.put(part, partSQL);
+			partsSQL.add(partSQL);
+		}
+		sql = String.format("select %s from emails where email_id=%s", String.join(", ", partsSQL), emailID);
+		
 		//Executes query
 		try {
 			Statement st = c.createStatement();
 			ResultSet rs = st.executeQuery(sql);
 			System.out.println("Executed query: " + sql);
-			String component;
-			for (String part : parts) {
-				if (rs.next() && (component = rs.getString(part)) != null) {
+			
+			while (rs.next()) {
+				String component;
+				for (String part : parts) {
+					component = rs.getString(part);
 					if (part.equals("read")) {
 						switch (component) {
 							case "t":

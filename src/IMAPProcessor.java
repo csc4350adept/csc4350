@@ -14,7 +14,6 @@ public class IMAPProcessor extends CmdProcessor {
 	
 	public IMAPProcessor() {
 		query = new Query();
-		//System.out.println("created queryyyyy");
 	}
 	
 	public String processBytes(byte[] command) {
@@ -32,7 +31,6 @@ public class IMAPProcessor extends CmdProcessor {
 		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public String queryGenerator() {
 		switch (query.getCommand()) {
 			case "LOGIN":
@@ -44,12 +42,10 @@ public class IMAPProcessor extends CmdProcessor {
 					return "NO - Login failure: Invalid username or password";
 			case "LIST":
 				if (isAuthenticated && query.getUsername() != null) {
-					System.out.println("AUTHED AND QUERIED MOFO");
-					String refRegex = "LIST\\s[a-zA-Z0-9]+";
-					String mailboxRegex = "LIST\\s[a-zA-Z0-9]+\\s[a-zA-Z0-9_]+";
+					String refRegex = "LIST\\s[a-zA-Z0-9@_.]+";
+					String mailboxRegex = "LIST\\s[a-zA-Z0-9@_.]+\\s[a-zA-Z0-9_]+";
 					String command = query.getFullCommand();
 					ArrayList<String> resp = null;
-					System.out.println("command is " + command);
 					if (command.matches(refRegex)) {
 						String userName = command.split("\\s")[1];
 						resp = QueryHandler.listRef(userName);
@@ -84,7 +80,9 @@ public class IMAPProcessor extends CmdProcessor {
 							for (String key : new String[] {"date", "to", "from", "subject"})
 								if (fetchData.containsKey(key)) respParts.add(String.format("%s: %s", key.toUpperCase(), fetchData.get(key)));
 								else missingData = true;
-							if (!missingData) resp = String.join("\n", respParts);
+							if (!missingData) {
+								resp = String.join("\n", respParts);
+							}
 							return resp;
 						case "BODY":
 							fetchData = QueryHandler.fetch(emailID, respType);
