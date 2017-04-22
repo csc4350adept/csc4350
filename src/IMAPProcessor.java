@@ -121,6 +121,7 @@ public class IMAPProcessor extends CmdProcessor {
 					switch (appendFlag) {
 						case "read":
 							if (QueryHandler.setRead(appendID)) resp = "OK - append completed";
+							break;
 						default:
 							resp = "NO - append error: can't append to that mailbox, error in flags";
 					}
