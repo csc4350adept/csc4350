@@ -44,6 +44,18 @@ public class Query {
 		else if (commandParts.get(0).contains("APPEND")) {
 			return command = "APPEND";
 		}
+		else if (commandParts.get(0).contains("CREATE")) {
+			return command = "CREATE";
+		}
+		else if (commandParts.get(0).contains("DELETE")) {
+			return command = "DELETE";
+		}
+		else if (commandParts.get(0).contains("RENAME")) {
+			return command = "RENAME";
+		}
+		else if (commandParts.get(0).contains("UID")) {
+			return command = "UID";
+		}
 		
 		return null;
 	}

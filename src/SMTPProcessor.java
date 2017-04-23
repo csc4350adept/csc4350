@@ -3,7 +3,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class SMTPProcessor extends CmdProcessor{
 
@@ -58,12 +57,12 @@ public class SMTPProcessor extends CmdProcessor{
 		for (String line : lines) {
 			if(line.toLowerCase().matches(dateRegex)) {
 				lineParts = new ArrayList<String>(Arrays.asList(line.split("\\s")));
-				date = String.join(" ", lineParts.subList(1, lineParts.size() - 1));
+				date = String.join(" ", lineParts.subList(1, lineParts.size()));
 				tmp.add(line);
 			}
 			if(line.toLowerCase().matches(subjectRegex)) {
 				lineParts = new ArrayList<String>(Arrays.asList(line.split("\\s")));
-				subject = String.join(" ", lineParts.subList(1, lineParts.size() - 1));
+				subject = String.join(" ", lineParts.subList(1, lineParts.size()));
 				tmp.add(line);
 			}
 			if(line.toLowerCase().matches(toRegex)) {
@@ -145,7 +144,6 @@ public class SMTPProcessor extends CmdProcessor{
 	}
 	
 	public String queryGenerator() {
-		String req;
 		String fullReq;
 		ArrayList<String> reqParts;
 		String resp = "500 Unrecognized command";

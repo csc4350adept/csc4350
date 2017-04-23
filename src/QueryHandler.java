@@ -221,6 +221,31 @@ public class QueryHandler {
 		return false;
 	}
 	
+	public static boolean moveEmail(String emailId, String mailbox, String owner) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		
+		String mailboxId = getMailboxId(mailbox, owner);
+		//Constructs SQL string
+		String sql = String.format("update emails set mailbox=%s where email_id=%s", mailboxId, emailId);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+		} catch (SQLException e) {
+			if (e.getMessage().startsWith("No results were returned by the query")) return true;
+			else System.out.println(e.getMessage());
+		}
+		//If there was a SQLException or no password, return null
+		return false;
+	}
+	
 	public static boolean emailExists(String email) {
 		//Gets database connection "c"
 		java.sql.Connection c;
@@ -324,6 +349,86 @@ public class QueryHandler {
 		
 		//Constructs SQL string
 		String sql = String.format("insert into mailboxes values(default, '%s', %s)", mailbox, user_id);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			System.out.println("Executed query: " + sql);
+			st.executeQuery(sql);
+		} catch (SQLException e) {
+			if (e.getMessage().startsWith("No results were returned by the query")) return true;
+			else System.out.println(e.getMessage());
+		}
+		//If there was a SQLException or no password, return null
+		return false;
+	}
+	
+	public static boolean renameMailbox(String owner, String mailbox, String newname) {
+		if (mailboxExists(owner, mailbox)) return true;
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		
+		String user_id = getEmailId(owner);
+		if (user_id == null) return false;
+		
+		//Constructs SQL string
+		String sql = String.format("update mailboxes set mailbox='%s' where mailbox='%s' and owner=%s", newname, mailbox, user_id);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			System.out.println("Executed query: " + sql);
+			st.executeQuery(sql);
+		} catch (SQLException e) {
+			if (e.getMessage().startsWith("No results were returned by the query")) return true;
+			else System.out.println(e.getMessage());
+		}
+		//If there was a SQLException or no password, return null
+		return false;
+	}
+	
+	public static boolean deleteMailbox(String owner, String mailbox) {
+		if (mailboxExists(owner, mailbox)) return true;
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		
+		String user_id = getEmailId(owner);
+		if (user_id == null) return false;
+		
+		//Constructs SQL string
+		String sql = String.format("delete from mailboxes where mailbox='%s' and owner=%s", mailbox, user_id);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			System.out.println("Executed query: " + sql);
+			st.executeQuery(sql);
+		} catch (SQLException e) {
+			if (e.getMessage().startsWith("No results were returned by the query")) return true;
+			else System.out.println(e.getMessage());
+		}
+		//If there was a SQLException or no password, return null
+		return false;
+	}
+	
+	public static boolean deleteEmail(String email) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		
+		//Constructs SQL string
+		String sql = String.format("delete from emails where email_id=%s", email);
 		//Executes query
 		try {
 			Statement st = c.createStatement();

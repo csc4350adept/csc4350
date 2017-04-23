@@ -72,6 +72,7 @@ public class IMAPProcessor extends CmdProcessor {
 				break;
 				
 			case "FETCH":
+				if (!isAuthenticated || query.getUsername() == null) break;
 				req = query.getFullCommand();
 				reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
 				if(reqParts.size() == 3) {
@@ -113,6 +114,7 @@ public class IMAPProcessor extends CmdProcessor {
 				break;
 			
 			case "APPEND":
+				if (!isAuthenticated || query.getUsername() == null) break;
 				resp = "NO - append error: can't append to that mailbox, error in flags or date/time or message text";
 				req = query.getFullCommand();
 				reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
@@ -129,9 +131,79 @@ public class IMAPProcessor extends CmdProcessor {
 					}
 				}
 				break;
+			
+			//not tested
+			case "CREATE":
+				if (!isAuthenticated || query.getUsername() == null) break;
+				resp = "BAD - command unknown or arguments invalid";
+				req = query.getFullCommand();
+				reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
+				if (reqParts.size() == 2) {
+					resp = "NO - create failure: can't create mailbox with that name";
+					String mailbox = reqParts.get(1);
+					if (mailbox.matches("\"[^\"]+\"")) mailbox = mailbox.replaceAll("\"", "");
+					else break;
+					if (QueryHandler.createMailbox(query.getUsername(), mailbox)) resp = "OK - create completed";
+				}
+				break;
+			
+			//not tested
+			case "DELETE":
+				if (!isAuthenticated || query.getUsername() == null) break;
+				resp = "BAD - command unknown or arguments invalid";
+				req = query.getFullCommand();
+				reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
+				if (reqParts.size() == 2) {
+					resp = "NO - delete failure: can't delete mailbox with that name";
+					String mailbox = reqParts.get(1);
+					if (mailbox.matches("\"[^\"]+\"")) mailbox = mailbox.replaceAll("\"", "");
+					else break;
+					if (QueryHandler.deleteMailbox(query.getUsername(), mailbox)) resp = "OK - delete completed";
+				}
+				break;
+				
+			//not tested
+			case "RENAME":
+				if (!isAuthenticated || query.getUsername() == null) break;
+				resp = "BAD - command unknown or arguments invalid";
+				req = query.getFullCommand();
+				reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
+				if (reqParts.size() == 3) {
+					resp = "NO - rename failure: can't rename mailbox with that name, can't rename to mailbox with that name";
+					String mailbox = reqParts.get(1);
+					if (mailbox.matches("\"[^\"]+\"")) mailbox = mailbox.replaceAll("\"", "");
+					else break;
+					String newName = reqParts.get(2);
+					if (newName.matches("\"[^\"]+\"")) newName = newName.replaceAll("\"", "");
+					else break;
+					if (QueryHandler.renameMailbox(query.getUsername(), mailbox, newName)) resp = "OK - rename completed";
+				}
+				break;
+				
+			//not tested
+			case "UID":
+				if (!isAuthenticated || query.getUsername() == null) break;
+				resp = "BAD - command unknown or arguments invalid";
+				req = query.getFullCommand();
+				reqParts = new ArrayList<String>(Arrays.asList(req.split("\\s")));
+				if (reqParts.size() >= 4) {
+					if (!reqParts.get(1).equals("MOVE")) break;
+					resp = "NO - move error: can't move those messages or to that name";
+					String email = reqParts.get(2);
+					if (!email.matches("[0-9]+")) break;
+					String mailbox = String.join(" ", reqParts.subList(3, reqParts.size()));
+					if (QueryHandler.moveEmail(query.getUsername(), email, mailbox)) resp = "OK - move completed";
+				} else if (reqParts.size() == 3) {
+					if (!reqParts.get(1).equals("EXPUNGE")) break;
+					resp = "NO - expunge error: can't expunge those messages";
+					String email = reqParts.get(2);
+					if (!email.matches("[0-9]+")) break;
+					if (QueryHandler.deleteEmail(email)) resp = "OK - expunge completed";
+				}
+				break;
 				
 			default:
-				resp = "BAD - Invalid or unknown command"; //TODO find out what ???? means || connection identifier? (if so we dont care)
+				resp = "BAD - Invalid or unknown command";
 		}
 		return resp;
 	}
