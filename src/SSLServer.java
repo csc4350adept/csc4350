@@ -78,14 +78,24 @@ abstract public class SSLServer {
 	public void startServer() {
 		//Start listening for a connection
 		//If the connection starts, do stuff
+		boolean firstFailure = true;
 		while (true) {
 			try {
+				System.out.println("Server is listening on port " + port);
 				SSLSocket connection = (SSLSocket) this.server.accept();
 				Thread minion = createConnectionThread(connection);
 				minion.start();
+				firstFailure = true;
+			} catch (NullPointerException e) {
+				if (firstFailure) {
+					System.out.println(String.format("Server could not initialize. Check to see if port %d is open and available, or that the server program has appropriate permission to access it. A common cause of this issue is that another instance of the ADEPT server is already running.", port));
+					firstFailure = false;
+				}
 			} catch (Exception e) {
-				//If this catch is tripping, check to be sure that the keyFile exists in the correct path (same path as executing file)
-				System.err.println(e.toString());
+				if (firstFailure) {
+					System.out.println("Server could not initialize. Unknown error");
+					firstFailure = false;
+				}
 			}
 		}
 	}
