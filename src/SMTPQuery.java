@@ -1,9 +1,9 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
-//By B. Daniel Garber
+/* SMTP was very, very broken. I don't have time to do proper inheritance, so I'm just copying Daniel's Query class and modifying it for SMTP */
 
-public class Query {
+public class SMTPQuery {
 	// GLOBAL Variables
 	private String fullCommand;
 	private String command;
@@ -17,7 +17,7 @@ public class Query {
 	
 	// GLOBAL Instances
 	
-	public Query () {
+	public SMTPQuery () {
 		
 	}
 	
@@ -34,15 +34,15 @@ public class Query {
 				return command = "LOGIN";
 			}
 		}
-		else if (commandParts.get(0).equals("LIST")) {
+		else if (commandParts.get(0).equals("MAIL")) {
 			
-			return command = "LIST";
+			return command = "MAIL";
 		}
-		else if (commandParts.get(0).contains("FETCH")) {
-			return command = "FETCH";
+		else if (commandParts.get(0).contains("RCPT")) {
+			return command = "RCPT";
 		}
-		else if (commandParts.get(0).contains("APPEND")) {
-			return command = "APPEND";
+		else if (commandParts.get(0).contains("DATA")) {
+			return command = "DATA";
 		}
 		
 		return null;

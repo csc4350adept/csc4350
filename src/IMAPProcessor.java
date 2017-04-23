@@ -36,6 +36,8 @@ public class IMAPProcessor extends CmdProcessor {
 		ArrayList<String> reqParts;
 		String resp = "BAD - Invalid or unknown command";
 		
+		if (query.getCommand() == null) return resp;
+		
 		switch (query.getCommand()) {
 			case "LOGIN":
 				if (checkAuth(query.getUsername(), query.getPassword())) { // If the username and password are the same as in the DB

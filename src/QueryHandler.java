@@ -221,11 +221,236 @@ public class QueryHandler {
 		return false;
 	}
 	
-	/*
-	 * We probably don't need this method
-	 */
-	public static boolean updateAll(HashMap<String, HashMap<String, String>> mailboxEmails) {
-		return true;
+	public static boolean emailExists(String email) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		//Constructs SQL string
+		String sql = String.format("select user_id from users where email='%s'", email);
+		//Executes query
+		int count = 0;
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+			while (rs.next())
+				count++;
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+		if (count == 1) return true;
+		else return false;
+	}
+	
+	public static String getEmailId(String email) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return null;
+		}
+		//Constructs SQL string
+		String sql = String.format("select user_id from users where email='%s'", email);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+			ArrayList<String> ids = new ArrayList<String>();
+			//If there is a row returned, add to the mailboxes list
+			String id;
+			while (rs.next() && (id = rs.getString("user_id")) != null) {
+				System.out.println("dfsafds" + id);
+				ids.add(id);
+			}
+			if (ids.size() == 1) return ids.get(0);
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		//If there was a SQLException or no password, return null
+		return null;
+	}
+	
+	public static String getMailboxId(String mailbox, String owner) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			System.out.println("DB initialization failed");
+			return null;
+		}
+		//Constructs SQL string
+		String sql = String.format("select mailbox_id from mailboxes inner join users on mailboxes.owner=users.user_id where mailbox='%s' and email='%s'", mailbox, owner);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+			ArrayList<String> mailboxes = new ArrayList<String>();
+			//If there is a row returned, add to the mailboxes list
+			String m;
+			while (rs.next() && (m = rs.getString("mailbox_id")) != null) {
+				System.out.println("dfsafdas" + m);
+				mailboxes.add(m);
+			}
+			if (mailboxes.size() == 1) return mailboxes.get(0);
+		} catch (SQLException e) {
+			/* nothing */
+			System.out.println(e.getMessage());
+		}
+		//If there was a SQLException or no password, return null
+		return null;
+	}
+	
+	public static boolean createMailbox(String owner, String mailbox) {
+		if (mailboxExists(owner, mailbox)) return true;
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		
+		String user_id = getEmailId(owner);
+		if (user_id == null) return false;
+		
+		//Constructs SQL string
+		String sql = String.format("insert into mailboxes values(default, '%s', %s)", mailbox, user_id);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			System.out.println("Executed query: " + sql);
+			st.executeQuery(sql);
+		} catch (SQLException e) {
+			if (e.getMessage().startsWith("No results were returned by the query")) return true;
+			else System.out.println(e.getMessage());
+		}
+		//If there was a SQLException or no password, return null
+		return false;
+	}
+	
+	public static boolean mailboxExists(String owner, String mailbox) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		//Constructs SQL string
+		String sql = String.format("select mailbox_id from mailboxes inner join users on mailboxes.owner=users.user_id where mailbox='%s' and email='%s'", mailbox, owner);
+		//Executes query
+		int count = 0;
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs = st.executeQuery(sql);
+			System.out.println("Executed query: " + sql);
+			while (rs.next())
+				count++;
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+		if (count == 1) return true;
+		else return false;
+	}
+
+	public static boolean receiveEmail(ArrayList<String> owners, HashMap<String, String> email) {
+		boolean success = true;
+		
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return false;
+		}
+		ArrayList<String> noQuotes = new ArrayList<String>(Arrays.asList(new String[] {"email_id", "owner", "read", "mailbox", "date"}));
+		email.put("email_id", "default");
+		email.put("mailbox", "inbox");
+		email.put("read", "false");
+		email.put("date", "now()");
+		
+		ArrayList<String> requiredFields = new ArrayList<String>(Arrays.asList(new String[] {"email_id", "to", "from", "body", "date", "read", "subject", "mailbox"}));
+			//Owner gets added a few lines down so don't check it here
+		boolean valid = true;
+		for (String field : requiredFields)
+			if (!email.keySet().contains(field)) valid = false;
+		if (!valid) {
+			System.out.println("Invalid email");
+			System.out.println("Required Fields: " + String.join(",", requiredFields));
+			System.out.println("Included Fields: " + String.join(",", email.keySet()));
+			return false;
+		}
+		
+		for (String owner : owners) {
+			email.put("owner", owner);
+			
+			if (!mailboxExists(owner, email.get("mailbox"))) createMailbox(owner, email.get("mailbox")); //Everyone needs an inbox
+			
+			
+			
+			//Constructs SQL string
+			ArrayList<String> parts = new ArrayList<String>(email.keySet());
+			ArrayList<String> values = new ArrayList<String>();
+			String partsString;
+			String valuesString;
+			for (String part : parts) {
+				String value = email.get(part);
+				if (noQuotes.contains(part)) {
+					switch (part) {
+					case "mailbox":
+						System.out.println("mailbox is " + value);
+						value = getMailboxId(value, owner);
+						if (value == null) {
+							System.out.println("Missing mailbox id for " + value + ", " + owner);
+							return false;
+						}
+						break;
+					case "owner":
+						value = getEmailId(value);
+						if (value == null) {
+							System.out.println("Missing email id for " + value);
+							return false;
+						}
+						break;
+					}
+					values.add(value);
+				}
+				else {
+					System.out.println(part + ", " + value);
+					values.add("'" + value.replaceAll("'", "''") + "'");
+				}
+			}
+			ArrayList<String> tmp = new ArrayList<String>();
+			for (String part : parts) tmp.add("\""+part+"\"");
+			parts = tmp;
+			partsString = String.join(", ", parts);
+			valuesString = String.join(", ", values);
+			String sql = String.format("insert into emails (%s) values (%s);", partsString, valuesString);
+			
+			
+			//Executes query
+			try {
+				Statement st = c.createStatement();
+				System.out.println("Executed query: " + sql);
+				st.executeQuery(sql);
+			} catch (SQLException e) {
+				if (!e.getMessage().startsWith("No results were returned by the query")) {
+					success = false;
+					System.out.println(e.getMessage());
+				}
+			}
+		}
+		return success;
 	}
 	
 }

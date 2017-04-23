@@ -26,13 +26,13 @@ abstract public class Connection {
 				//Break on newlines
 				while ((cur = in.read(buffer)) > 0) {
 					//grows data until it's big enough to accept more bytes
-					while (pos + cur >= data.length) {
+					while (pos + cur > data.length) {
 						byte[] tempData = new byte[data.length + chunkSize];
 						System.arraycopy(data, 0, tempData, 0, data.length);
 						data = tempData;
 					}
 					//Now fills data with the new buffer
-					System.arraycopy(buffer, 0, data, pos, cur + 1);
+					System.arraycopy(buffer, 0, data, pos, cur);
 					pos += cur;
 					byte lastBufferByte = buffer[buffer.length - 1];
 					//Kicks out of the loop if the last byte is a buffer or null byte
