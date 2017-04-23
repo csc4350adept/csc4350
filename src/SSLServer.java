@@ -79,9 +79,9 @@ abstract public class SSLServer {
 		//Start listening for a connection
 		//If the connection starts, do stuff
 		boolean firstFailure = true;
+		System.out.println("Server is listening on port " + port);
 		while (true) {
 			try {
-				System.out.println("Server is listening on port " + port);
 				SSLSocket connection = (SSLSocket) this.server.accept();
 				Thread minion = createConnectionThread(connection);
 				minion.start();

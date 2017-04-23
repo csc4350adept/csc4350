@@ -221,7 +221,7 @@ public class QueryHandler {
 		return false;
 	}
 	
-	public static boolean moveEmail(String emailId, String mailbox, String owner) {
+	public static boolean moveEmail(String ownerName, String emailId, String mailbox) {
 		//Gets database connection "c"
 		java.sql.Connection c;
 		try {
@@ -230,7 +230,7 @@ public class QueryHandler {
 			return false;
 		}
 		
-		String mailboxId = getMailboxId(mailbox, owner);
+		String mailboxId = getMailboxId(mailbox, ownerName);
 		//Constructs SQL string
 		String sql = String.format("update emails set mailbox=%s where email_id=%s", mailboxId, emailId);
 		//Executes query
@@ -285,13 +285,41 @@ public class QueryHandler {
 		//Executes query
 		try {
 			Statement st = c.createStatement();
-			ResultSet rs = st.executeQuery(sql);
 			System.out.println("Executed query: " + sql);
+			ResultSet rs = st.executeQuery(sql);
 			ArrayList<String> ids = new ArrayList<String>();
 			//If there is a row returned, add to the mailboxes list
 			String id;
 			while (rs.next() && (id = rs.getString("user_id")) != null) {
-				System.out.println("dfsafds" + id);
+				ids.add(id);
+			}
+			if (ids.size() == 1) return ids.get(0);
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		//If there was a SQLException or no password, return null
+		return null;
+	}
+	
+	public static String getEmailFromId(String emailId) {
+		//Gets database connection "c"
+		java.sql.Connection c;
+		try {
+			c = createDB();
+		} catch (SQLException e) {
+			return null;
+		}
+		//Constructs SQL string
+		String sql = String.format("select email from users where email_id='%s'", emailId);
+		//Executes query
+		try {
+			Statement st = c.createStatement();
+			System.out.println("Executed query: " + sql);
+			ResultSet rs = st.executeQuery(sql);
+			ArrayList<String> ids = new ArrayList<String>();
+			//If there is a row returned, add to the mailboxes list
+			String id;
+			while (rs.next() && (id = rs.getString("email")) != null) {
 				ids.add(id);
 			}
 			if (ids.size() == 1) return ids.get(0);
@@ -316,8 +344,8 @@ public class QueryHandler {
 		//Executes query
 		try {
 			Statement st = c.createStatement();
-			ResultSet rs = st.executeQuery(sql);
 			System.out.println("Executed query: " + sql);
+			ResultSet rs = st.executeQuery(sql);
 			ArrayList<String> mailboxes = new ArrayList<String>();
 			//If there is a row returned, add to the mailboxes list
 			String m;
