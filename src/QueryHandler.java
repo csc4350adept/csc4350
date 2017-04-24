@@ -518,7 +518,7 @@ public class QueryHandler {
 	}
 	
 	public static boolean deleteMailbox(String owner, String mailbox) {
-		if (mailboxExists(owner, mailbox)) return true;
+		if (!mailboxExists(owner, mailbox)) return true;
 		boolean resp = false;
 		//Gets database connection "c"
 		java.sql.Connection c;
@@ -529,7 +529,6 @@ public class QueryHandler {
 		}
 		
 		String user_id = getEmailId(owner);
-		
 		
 		//Constructs SQL string
 		String sql = String.format("delete from mailboxes where mailbox='%s' and owner=%s", mailbox, user_id);
