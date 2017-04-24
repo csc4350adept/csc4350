@@ -40,6 +40,7 @@ public class QueryHandler {
 	 * Retrieves a password from the database using a username
 	 */
 	public static String getPassword (String username) {
+		String resp = null;
 		//Gets database connection "c"
 		java.sql.Connection c;
 		try {
@@ -57,15 +58,18 @@ public class QueryHandler {
 			//If there is a row returned, get the column "passwordhash" and return it
 			if (rs.next() && rs.getString("password") != null) {
 				pword = rs.getString("password");
-				c.close();
-				return pword;
+				resp = pword;
 			}
-			c.close();
 		} catch (SQLException e) {
 			/* nothing */
 		}
 		//If there was a SQLException or no password, return null
-		return null;
+		try {
+			c.close();
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		return resp;
 	}
 	
 	
@@ -76,6 +80,7 @@ public class QueryHandler {
 	 * Create table mailboxes with columns <email, mailboxName> with both as primary keys 
 	 */
 	public static ArrayList<String> listRef(String userName) {
+		ArrayList<String> resp = new ArrayList<String>();
 		//Gets database connection "c"
 		java.sql.Connection c;
 		try {
@@ -96,13 +101,17 @@ public class QueryHandler {
 			while (rs.next() && (mailbox = rs.getString("mailbox")) != null) {
 				mailboxes.add(mailbox);
 			}
-			c.close();
-			return mailboxes;
+			resp = mailboxes;
 		} catch (SQLException e) {
 			/* nothing */
 		}
 		//If there was a SQLException or no password, return null
-		return null;
+		try {
+			c.close();
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		return resp;
 	}
 	
 	/*
@@ -110,6 +119,7 @@ public class QueryHandler {
 	 * Return an ArrayList of emailIDs that belong to that email and belong to that mailboxName
 	 */
 	public static ArrayList<String> listMailbox(String userName, String mailboxName) {
+		ArrayList<String> resp = new ArrayList<String>();
 		//Gets database connection "c"
 		java.sql.Connection c;
 		try {
@@ -130,13 +140,17 @@ public class QueryHandler {
 			while (rs.next() && (mailbox = rs.getString("email_id")) != null) {
 				mailboxes.add(mailbox);
 			}
-			c.close();
-			return mailboxes;
+			resp = mailboxes;
 		} catch (SQLException e) {
 			/* nothing */
 		}
 		//If there was a SQLException or no password, return null
-		return null;
+		try {
+			c.close();
+		} catch (SQLException e) {
+			/* nothing */
+		}
+		return resp;
 	}
 	
 	/*
@@ -144,6 +158,7 @@ public class QueryHandler {
 	 * Return a HashMap<String, String> with all the data for the email that has that emailID and belongs to that email
 	 */
 	public static HashMap<String, String> fetch(String emailID, String fetchType) {
+		HashMap<String, String> resp = null;
 		HashMap<String, String> email = new HashMap<String, String>();
 		//Gets database connection "c"
 		java.sql.Connection c;
@@ -166,7 +181,7 @@ public class QueryHandler {
 			try {
 				c.close();
 			} catch (SQLException e) {
-				/* ndo nothing */
+				/* do nothing */
 			}
 			return null;
 		}
@@ -203,8 +218,7 @@ public class QueryHandler {
 				}
 			}
 			if (email.keySet().size() > 0) {
-				c.close();
-				return email;
+				resp = email;
 			}
 		} catch (SQLException e) {
 			/* nothing */
@@ -215,7 +229,7 @@ public class QueryHandler {
 		} catch (SQLException e) {
 			/* nothing */
 		}
-		return null;
+		return resp;
 	}
 	
 	public static boolean setRead(String emailID) {
@@ -234,7 +248,6 @@ public class QueryHandler {
 			Statement st = c.createStatement();
 			st.executeQuery(sql);
 			System.out.println("Executed query: " + sql);
-			c.close();
 		} catch (SQLException e) {
 			if (e.getMessage().startsWith("No results were returned by the query")) resp = true;
 			else System.out.println(e.getMessage());
@@ -334,7 +347,6 @@ public class QueryHandler {
 				ids.add(id);
 			}
 			if (ids.size() == 1) {
-				c.close();
 				resp = ids.get(0);
 			}
 		} catch (SQLException e) {
@@ -439,7 +451,11 @@ public class QueryHandler {
 		//Executes query
 		try {
 			if (user_id == null) {
-				c.close();
+				try {
+					c.close();
+				} catch (SQLException e) {
+					/* nothing */
+				}
 				return false;
 			}
 			Statement st = c.createStatement();
@@ -477,7 +493,11 @@ public class QueryHandler {
 		//Executes query
 		try {
 			if (user_id == null) {
-				c.close();
+				try {
+					c.close();
+				} catch (SQLException e) {
+					/* nothing */
+				}
 				return false;
 			}
 			Statement st = c.createStatement();
@@ -515,7 +535,11 @@ public class QueryHandler {
 		//Executes query
 		try {
 			if (user_id == null) {
-				c.close();
+				try {
+					c.close();
+				} catch (SQLException e) {
+					/* nothing */
+				}
 				return false;
 			}
 			Statement st = c.createStatement();
