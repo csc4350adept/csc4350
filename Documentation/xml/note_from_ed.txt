@@ -1,0 +1,11 @@
+these are all the draw.io diagrams i've done for the previous documents in xml form
+
+whoever gets the time to get to this, look at each xml diagram and make sure it's current with our standing programs
+
+ex. with class diagrams, make sure that all the class names are the same, that we have all of our classes, that the interactions are the same, that method names are listed, and so on.
+
+i made all these diagrams back when we were still in planning stages. now's the time to update them
+
+make sure that it looks nice! documentation is like 80% of our final grade, and the prof has shown that he is impressed by graphics and charts.
+
+when you are done tinkering on draw.io, export to jpg and put the results in the corresponding folder in /jpg instead of /xml

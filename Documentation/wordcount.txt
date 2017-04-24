@@ -1,0 +1,38 @@
+
+git ls-files | grep -E "\.java|PostgreSQL_scripts|SQLscripts" | xargs wc -l
+
+
+$ git ls-files | grep -E "\.java|PostgreSQL_scripts|SQLscripts" | xargs wc -l
+  150 Documentation/PostgreSQL_scripts
+  137 Documentation/SQLscripts
+   11 src/CmdProcessor.java
+   90 src/Connection.java
+   73 src/Crypt.java
+   10 src/CryptException.java
+   21 src/IMAPConnection.java
+  210 src/IMAPProcessor.java
+   19 src/ImapServer.java
+   82 src/Query.java
+  561 src/QueryHandler.java
+   14 src/SMTPConnection.java
+  261 src/SMTPProcessor.java
+   70 src/SMTPQuery.java
+  105 src/SSLServer.java
+  133 src/ServerController.java
+   19 src/SmtpServer.java
+ 1966 total
+ 
+ 
+ $ git ls-files | grep -E "\.java|PostgreSQL_scripts|SQLscripts" | xargs wc -l
+  172 src/AdeptConnection.java
+  109 src/Authenticate.java
+  452 src/CLI.java
+  312 src/Client.java
+   12 src/ClientRequestException.java
+   72 src/Crypt.java
+   10 src/CryptException.java
+  177 src/EditEmail.java
+   48 src/Main.java
+  527 src/SQLiteInterface.java
+  123 src/Update.java
+ 2014 total
