@@ -25,14 +25,11 @@ public class QueryHandler {
 		try {
 			c = DriverManager.getConnection(driverManager, uname, pword);
 		} catch (SQLException e) {
-			c.close();
 			throw e;
 		}
 		if (c == null) {
-			c.close();
 			throw new SQLException("SQL connection failed.");
 		}
-		c.close();
 		return c;
 	}
 
@@ -43,9 +40,11 @@ public class QueryHandler {
 		String resp = null;
 		//Gets database connection "c"
 		java.sql.Connection c;
+		System.out.println("dfa");
 		try {
 			c = createDB();
 		} catch (SQLException e) {
+			System.out.println("dfafd");
 			return null;
 		}
 		//Constructs SQL string
@@ -54,14 +53,15 @@ public class QueryHandler {
 		try {
 			Statement st = c.createStatement();
 			ResultSet rs = st.executeQuery(sql);
-			String pword;
+			System.out.println("dfsafasd");
 			//If there is a row returned, get the column "passwordhash" and return it
 			if (rs.next() && rs.getString("password") != null) {
-				pword = rs.getString("password");
-				resp = pword;
+				resp = rs.getString("password");
+				System.out.println("Password: " + resp);
 			}
 		} catch (SQLException e) {
 			/* nothing */
+			System.out.println(e.getMessage());
 		}
 		//If there was a SQLException or no password, return null
 		try {
@@ -69,6 +69,7 @@ public class QueryHandler {
 		} catch (SQLException e) {
 			/* nothing */
 		}
+		System.out.println("Password: " + resp);
 		return resp;
 	}
 	
