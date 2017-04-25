@@ -40,7 +40,10 @@ public class ServerController {
 		keysFilePwd = "foobar".toCharArray();
 		keysPwd = "123foobar!".toCharArray();
 		smtpMaxSize = 250000000;
-		dbHostname = "138.197.104.156";
+		
+		if (args.length == 1 && args[0].equals("-adept"))
+			dbHostname = "138.197.104.156";
+		else dbHostname = defaultHostname;
 		dbPort = 5432;
 		dbName = "coredb";
 		dbUname = "adept";
